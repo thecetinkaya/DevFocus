@@ -12,7 +12,7 @@ const StatsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           {Object.entries(stats).length === 0 && <li>Henüz istatistik yok.</li>}
           {Object.entries(stats).map(([date, count]) => (
             <li key={date} className="mb-2">
-              <span className="font-semibold">{date}:</span> {count} pomodoro
+              <span className="font-semibold">{date}:</span> {Number(count)} pomodoro
             </li>
           ))}
         </ul>
