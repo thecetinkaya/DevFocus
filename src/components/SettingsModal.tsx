@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { getPomodoroStats } from '../utils/pomodoroStats';
 import { getLogs } from '../utils/logs';
+import LogModal from './LogModal'; // LogModal'ı eklemeyi unutma
 
 type SettingsProps = {
   durations: {
@@ -26,6 +27,8 @@ const SettingsModal: React.FC<SettingsProps> = ({ durations, onSave, onClose }) 
     shortBreak: String(durations.shortBreak / 60),
     longBreak: String(durations.longBreak / 60),
   });
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [logFilter, setLogFilter] = useState<"daily" | "weekly" | "monthly">("daily");
 
   const handleSave = useCallback(() => {
     onSave({
@@ -42,6 +45,14 @@ const SettingsModal: React.FC<SettingsProps> = ({ durations, onSave, onClose }) 
       [field]: value,
     }));
   }, []);
+
+  const handleAddLog = (text: string) => {
+    // Log ekleme işlemini burada yapabilirsin
+    import("../utils/logs").then(({ addLogEntry }) => {
+      addLogEntry(text);
+      setShowLogModal(false);
+    });
+  };
 
   // Sabit bileşenler useCallback ile memoize ediliyor
   const TabBar = useCallback(() => (
@@ -91,10 +102,36 @@ const SettingsModal: React.FC<SettingsProps> = ({ durations, onSave, onClose }) 
   ), [TimeInput, localDurations]);
 
   const renderLogs = useCallback(() => {
-    const logs = getLogs("daily");
+    const logs = getLogs(logFilter);
     return (
       <div>
-        <h3 className="mb-2">Bugünkü Loglar</h3>
+        <h3 className="mb-2">Loglar</h3>
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setLogFilter("daily")}
+            className={logFilter === "daily" ? "bg-[#f87070] px-3 py-1 rounded text-white" : "bg-[#161932] px-3 py-1 rounded text-gray-300"}
+          >
+            Günlük
+          </button>
+          <button
+            onClick={() => setLogFilter("weekly")}
+            className={logFilter === "weekly" ? "bg-[#f87070] px-3 py-1 rounded text-white" : "bg-[#161932] px-3 py-1 rounded text-gray-300"}
+          >
+            Haftalık
+          </button>
+          <button
+            onClick={() => setLogFilter("monthly")}
+            className={logFilter === "monthly" ? "bg-[#f87070] px-3 py-1 rounded text-white" : "bg-[#161932] px-3 py-1 rounded text-gray-300"}
+          >
+            Aylık
+          </button>
+        </div>
+        <button
+          onClick={() => setShowLogModal(true)}
+          className="mb-4 bg-[#f87070] px-3 py-1 rounded text-white"
+        >
+          Log Ekle
+        </button>
         <ul>
           {Object.entries(logs).length === 0 && <li>Log yok.</li>}
           {Object.entries(logs).map(([date, entries]) =>
@@ -108,7 +145,7 @@ const SettingsModal: React.FC<SettingsProps> = ({ durations, onSave, onClose }) 
         </ul>
       </div>
     );
-  }, []);
+  }, [logFilter, setShowLogModal]);
 
   const renderStats = useCallback(() => {
     const stats = getPomodoroStats();
@@ -144,6 +181,14 @@ const SettingsModal: React.FC<SettingsProps> = ({ durations, onSave, onClose }) 
         {activeTab === 'settings' && renderSettings()}
         {activeTab === 'logs' && renderLogs()}
         {activeTab === 'stats' && renderStats()}
+
+        {/* LogModal tetiklenirse açılır */}
+        {showLogModal && (
+          <LogModal
+            onSave={handleAddLog}
+            onClose={() => setShowLogModal(false)}
+          />
+        )}
 
         <div className="mt-6 flex justify-end space-x-3">
           {activeTab === 'settings' && (
