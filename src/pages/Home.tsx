@@ -5,7 +5,6 @@ import SettingsModal from '../components/SettingsModal';
 import LogModal from '../components/LogModal';
 import LogListModal from '../components/LogListModal';
 import { addLogEntry } from '../utils/logs';
-import Sidebar from '../components/Sidebar';
 import StatsModal from '../components/StatsModal';
 
 const Home: React.FC = () => {
@@ -26,37 +25,29 @@ const Home: React.FC = () => {
     }
   };
 
-  return (
-    <div className="bg-gray-900 min-h-screen flex flex-col items-center justify-start">
-      
-       <Sidebar
-        onLogAddClick={() => setShowLogModal(true)}
-        onLogListClick={() => console.log("Log Kayıtları tıklandı")}
-        onStatsClick={() => setShowStats(true)} // İstatistikleri göster butonuna tıklandığında showStats'i true yap
-      />
-      {showStats && <StatsModal onClose={() => setShowStats(false)} />}
+  const handleStatsClick = () => {
+    setShowSettings(false);
+    setShowStats(true);
+  };
 
+  return (
+    <div className="bg-gray-900 min-h-screen flex flex-col items-center justify-start pt-8">
       <TimerDisplay
         durations={durations}
         onSettingsClick={() => setShowSettings(true)}
       />
-
-      {showLogModal && (
-        <LogModal
-          onSave={handleAddLog}
-          onClose={() => setShowLogModal(false)}
-        />
-      )}
-
-      {showLogList && (
-        <LogListModal onClose={() => setShowLogList(false)} />
-      )}
-
+      {/* Modal'lar */}
+      {showStats && <StatsModal onClose={() => setShowStats(false)} />}
+      {showLogModal && <LogModal onSave={handleAddLog} onClose={() => setShowLogModal(false)} />}
+      {showLogList && <LogListModal onClose={() => setShowLogList(false)} />}
       {showSettings && (
         <SettingsModal
           durations={durations}
           onSave={setDurations}
           onClose={() => setShowSettings(false)}
+          onLogAddClick={() => setShowLogModal(true)}
+          onLogListClick={() => setShowLogList(true)}
+          onStatsClick={handleStatsClick}
         />
       )}
     </div>
